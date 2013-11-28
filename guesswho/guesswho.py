@@ -28,7 +28,10 @@ class GuessWho():
 		self.response = {}
 		for line in lines:
 			line = line.split(delim)
-			self.response[line[0].lower()] = line[1]
+			try:
+				self.response[line[0].lower()] = line[1]
+			except IndexError:
+				pass
 
 
 def main():

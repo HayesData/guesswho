@@ -1,31 +1,42 @@
-from subprocess import check_output
 import getopt
 import ipaddress
 import re
 import sys
+import socket
 
 
 class GuessWho():
 	def __init__(self, address, timeout=5):
 		address = unicode(address)
 		self.address = ipaddress.ip_address(address)
+		self.arin_response = None
+		self.response = {}
+		self.whois()
+		self.parse_response()
 
+	def whois(self):
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		s.connect(("whois.arin.net", 43))
+		s.send(str(self.address) + "\r\n")
+		self.arin_response = ''
+		while True:
+			d = s.recv(4096)
+			self.arin_response += d
+			if d == '':
+				break
+		s.close()
+
+	def parse_response(self):
 		delim = '|delim|'
-
-		command = 'whois ' + str(self.address)
-		cmd_out = check_output([command], shell=True).strip()
-
-		cmd_out = re.sub('#.*', '', cmd_out)
-		cmd_out = re.sub(':\s+', delim, cmd_out)
-
-		cmd_out = cmd_out.split('\n')
+		self.arin_response = re.sub('#.*', '', self.arin_response)
+		self.arin_response = re.sub(':\s+', delim, self.arin_response)
+		self.arin_response = self.arin_response.split('\n')
 
 		lines = []
-		for line in cmd_out:
+		for line in self.arin_response:
 			if len(line.strip()):
 				lines.append(line)
 
-		self.response = {}
 		for line in lines:
 			line = line.split(delim)
 			try:
@@ -38,7 +49,6 @@ def main():
 	try:
 		opts, args = getopt.getopt(sys.argv, "", ["help"])
 	except getopt.GetoptError:
-		usage()
 		sys.exit(2)
 
 	try:

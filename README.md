@@ -1,4 +1,4 @@
 guesswho
 ========
 
-A python wrapper for the unix/linux whois command.
+A pure python implementation of a whois client.

@@ -1,5 +1,4 @@
 import getopt
-import ipaddress
 import re
 import sys
 import socket
@@ -8,7 +7,7 @@ import socket
 class GuessWho():
 	def __init__(self, address, timeout=5):
 		address = unicode(address)
-		self.address = ipaddress.ip_address(address)
+		self.address = address
 		self.arin_response = None
 		self.response = {}
 		self.whois()
